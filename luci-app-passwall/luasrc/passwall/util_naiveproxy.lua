@@ -3,6 +3,17 @@ local api = require "luci.passwall.api"
 local uci = api.uci
 local jsonc = api.jsonc
 
+function to_json(tbl)
+    local result = "{"
+    for k, v in pairs(tbl) do
+        -- 注意：这里假定了所有的key都是字符串，所有的value要么是字符串，要么是数字
+        result = result .. "\"" .. k .. "\":\"" .. v .. "\","
+    end
+    -- 去掉最后一个逗号，并添加闭合的大括号
+    result = result:sub(1, -2) .. "}"
+    return result
+end
+
 function gen_config(var)
 	local node_id = var["-node"]
 	if not node_id then
@@ -26,7 +37,7 @@ function gen_config(var)
 		proxy = node.protocol .. "://" .. node.username .. ":" .. node.password .. "@" .. server
 	}
 
-	return jsonc.stringify(config, 1)
+    return to_json(config)  -- 使用自定义的to_json函数来生成JSON字符串
 end
 
 _G.gen_config = gen_config
